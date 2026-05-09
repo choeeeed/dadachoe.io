@@ -23,45 +23,139 @@ title: home
 <script>
   var placed = [];
 
-  function overlaps(x, y, w, h) {
-    var gap = 40;
-    for (var i = 0; i < placed.length; i++) {
-      var p = placed[i];
-      if (
-        x < p.x + p.w + gap &&
-        x + w + gap > p.x &&
-        y < p.y + p.h + gap &&
-        y + h + gap > p.y
-      ) return true;
-    }
-    return false;
+  function overlapArea(ax, ay, aw, ah, bx, by, bw, bh) {
+    var ox = Math.max(0, Math.min(ax + aw, bx + bw) - Math.max(ax, bx));
+    var oy = Math.max(0, Math.min(ay + ah, by + bh) - Math.max(ay, by));
+    return ox * oy;
   }
 
-  function placeImage(src) {
+  function isValid(x, y, w, h) {
+    var newArea = w * h;
+    var overlapping = [];
+    for (var i = 0; i < placed.length; i++) {
+      var p = placed[i];
+      var ov = overlapArea(x, y, w, h, p.x, p.y, p.w, p.h);
+      if (ov > 0) {
+        if (ov > 0.2 * newArea || ov > 0.2 * (p.w * p.h)) return false;
+        overlapping.push(i);
+      }
+    }
+    for (var i = 0; i < overlapping.length; i++) {
+      for (var j = i + 1; j < overlapping.length; j++) {
+        var pi = placed[overlapping[i]], pj = placed[overlapping[j]];
+        var x1 = Math.max(x, pi.x, pj.x), x2 = Math.min(x + w, pi.x + pi.w, pj.x + pj.w);
+        var y1 = Math.max(y, pi.y, pj.y), y2 = Math.min(y + h, pi.y + pi.h, pj.y + pj.h);
+        if (x2 > x1 && y2 > y1) return false;
+      }
+    }
+    return true;
+  }
+
+  function placeImage(src, link) {
+    var isMobile = window.innerWidth <= 640;
+    var imgSize = isMobile ? Math.round(320 * 0.7) + 'px' : '320px';
+
     var img = document.createElement('img');
     img.src = BASE_URL + '/assets/images/' + src;
-    img.style.position = 'fixed';
-    img.style.maxWidth = '320px';
-    img.style.width = '320px';
-    img.style.zIndex = '0';
-    img.style.pointerEvents = 'none';
+    img.style.maxWidth = imgSize;
+    img.style.width = imgSize;
+    img.style.display = 'block';
+
+    var wrapper = link ? document.createElement('a') : document.createElement('div');
+    if (link) {
+      wrapper.href = link;
+      wrapper.target = '_blank';
+      wrapper.rel = 'noopener';
+      wrapper.style.cursor = 'pointer';
+    }
+    wrapper.style.position = 'fixed';
+    wrapper.style.zIndex = '0';
+    wrapper.appendChild(img);
+
     img.onload = function() {
-      var w = img.offsetWidth;
-      var h = img.offsetHeight;
+      var w = wrapper.offsetWidth;
+      var h = wrapper.offsetHeight;
+      var topMargin = 120;
       var maxX = window.innerWidth - w;
       var maxY = window.innerHeight - h;
       var x, y, tries = 0;
       do {
         x = Math.random() * Math.max(0, maxX);
-        y = Math.random() * Math.max(0, maxY);
+        y = topMargin + Math.random() * Math.max(0, maxY - topMargin);
         tries++;
-      } while (overlaps(x, y, w, h) && tries < 50);
-      img.style.left = x + 'px';
-      img.style.top = y + 'px';
+      } while (!isValid(x, y, w, h) && tries < 50);
+      wrapper.style.left = x + 'px';
+      wrapper.style.top = y + 'px';
       placed.push({ x: x, y: y, w: w, h: h });
     };
-    document.body.appendChild(img);
+    document.body.appendChild(wrapper);
   }
 
-  ['portrait.png', 'poster.jpg', 'orange-market.png', 'concrete-forest.jpg'].forEach(placeImage);
+  var imageList = [
+    { src: 'portrait.png',        link: 'https://www.instagram.com/dadachoe.works/' },
+    { src: 'poster.jpg',          link: 'https://www.instagram.com/p/DSPvqGPj1k9/' },
+    { src: 'orange-market.png',   link: null },
+    { src: 'concrete-forest.jpg', link: 'https://www.instagram.com/p/DKoSGfEuiHa/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==' },
+    { src: 'gforglow.jpg',        link: null }
+  ];
+  imageList.forEach(function(item) { placeImage(item.src, item.link); });
+
+  // Speech bubble
+  var bubble = document.createElement('div');
+  bubble.id = 'speech-bubble';
+  bubble.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:0.25px solid #000;padding:12px 20px;z-index:100;pointer-events:none;';
+  var textEl = document.createElement('p');
+  textEl.style.cssText = "font-family:'Anonymous Pro',monospace;font-weight:700;font-size:13px;color:#000;text-align:center;margin:0;white-space:nowrap;";
+  bubble.appendChild(textEl);
+  document.body.appendChild(bubble);
+
+  var msg1 = 'Hi. My name is DADACHOE.';
+  var msg2 = 'If you want to know more about me, click Biography';
+  var biographyUrl = BASE_URL + '/2026/welcome.html';
+
+  function type(text, cb) {
+    var i = 0;
+    var t = setInterval(function() {
+      textEl.textContent = text.slice(0, ++i);
+      if (i >= text.length) { clearInterval(t); if (cb) setTimeout(cb, 800); }
+    }, 65);
+  }
+
+  function del(cb) {
+    var t = setInterval(function() {
+      var cur = textEl.textContent;
+      if (cur.length === 0) { clearInterval(t); if (cb) setTimeout(cb, 300); return; }
+      textEl.textContent = cur.slice(0, -1);
+    }, 32);
+  }
+
+  setTimeout(function() {
+    type(msg1, function() {
+      del(function() {
+        type(msg2, function() {
+          textEl.innerHTML = 'If you want to know more about me, click <a href="' + biographyUrl + '" style="color:#55BABC;text-decoration:none;font-weight:700;">Biography</a>';
+          bubble.style.pointerEvents = 'auto';
+
+          // 두 번째 말풍선
+          var bubble2 = document.createElement('div');
+          var b1Rect = bubble.getBoundingClientRect();
+          var b1Bottom = b1Rect.top + b1Rect.height;
+          bubble2.style.cssText = 'position:fixed;top:' + (b1Bottom + 16) + 'px;left:50%;transform:translateX(-50%);background:#fff;border:0.25px solid #000;padding:12px 20px;z-index:100;pointer-events:none;';
+          var textEl2 = document.createElement('p');
+          textEl2.style.cssText = "font-family:'Anonymous Pro',monospace;font-weight:700;font-size:13px;color:#000;text-align:center;margin:0;white-space:nowrap;";
+          textEl2.textContent = 'or click the images on this page';
+          bubble2.appendChild(textEl2);
+          document.body.appendChild(bubble2);
+
+          setTimeout(function() {
+            [bubble, bubble2].forEach(function(b) {
+              b.style.transition = 'opacity 0.6s';
+              b.style.opacity = '0';
+              setTimeout(function() { b.remove(); }, 600);
+            });
+          }, 15000);
+        });
+      });
+    });
+  }, 400);
 </script>
