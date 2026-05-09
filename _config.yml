@@ -1,8 +1,8 @@
 title: "DADACHOE"
 description: "GitHub Pages와 Jekyll로 만든 개인 블로그"
 author: "your name"
-url: ""
-baseurl: ""
+url: "https://choeeeed.github.io"
+baseurl: "/dadachoe.io"
 timezone: Asia/Seoul
 theme: null
 
