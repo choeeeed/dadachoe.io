@@ -3,21 +3,65 @@ layout: default
 title: home
 ---
 
-<h1 class="site-title">{{ site.title | escape }}</h1>
+<div class="site-header">
+  <h1 class="site-title">{{ site.title | escape }}</h1>
+  <nav class="site-nav">
+    <p class="site-description"><a href="https://www.instagram.com/dadachoe/" target="_blank" rel="noopener">go to her instagram</a></p>
+    {% if site.posts.size > 0 %}
+      <ul class="post-list">
+        {% for post in site.posts %}
+          <li>
+            <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
+            <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </nav>
+</div>
 
-{% if site.description %}
-  <p class="site-description">{{ site.description | escape }}</p>
-{% endif %}
+<script>
+  var placed = [];
 
-{% if site.posts.size > 0 %}
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
-        <a href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <p>아직 글이 없습니다.</p>
-{% endif %}
+  function overlaps(x, y, w, h) {
+    var gap = 40;
+    for (var i = 0; i < placed.length; i++) {
+      var p = placed[i];
+      if (
+        x < p.x + p.w + gap &&
+        x + w + gap > p.x &&
+        y < p.y + p.h + gap &&
+        y + h + gap > p.y
+      ) return true;
+    }
+    return false;
+  }
+
+  function placeImage(src) {
+    var img = document.createElement('img');
+    img.src = '/assets/images/' + src;
+    img.style.position = 'fixed';
+    img.style.maxWidth = '320px';
+    img.style.width = '320px';
+    img.style.zIndex = '0';
+    img.style.pointerEvents = 'none';
+    img.onload = function() {
+      var w = img.offsetWidth;
+      var h = img.offsetHeight;
+      var maxX = window.innerWidth - w;
+      var maxY = window.innerHeight - h;
+      var x, y, tries = 0;
+      do {
+        x = Math.random() * Math.max(0, maxX);
+        y = Math.random() * Math.max(0, maxY);
+        tries++;
+      } while (overlaps(x, y, w, h) && tries < 50);
+      img.style.left = x + 'px';
+      img.style.top = y + 'px';
+      placed.push({ x: x, y: y, w: w, h: h });
+    };
+    document.body.appendChild(img);
+  }
+
+  ['portrait.png', 'poster.jpg', 'orange-market.png', 'concrete-forest.jpg'].forEach(placeImage);
+</script>

@@ -2,20 +2,10 @@
 layout: default
 ---
 
-<p><a href="{{ '/' | relative_url }}">처음으로</a></p>
+<p><a class="back-link" href="{{ '/' | relative_url }}">back</a></p>
 
-<article>
-  <header>
-    <h1>{{ page.title | escape }}</h1>
-    <p class="post-meta">
-      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
-      {% if page.author %}
-        <span>{{ page.author | escape }}</span>
-      {% elsif site.author %}
-        <span>{{ site.author | escape }}</span>
-      {% endif %}
-    </p>
-  </header>
-
-  {{ content }}
-</article>
+<div class="post-container">
+  <article>
+    {{ content }}
+  </article>
+</div>

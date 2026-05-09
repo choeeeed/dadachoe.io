@@ -6,9 +6,8 @@ html {
 }
 
 body {
-  margin: 2rem auto;
-  max-width: 42rem;
-  padding: 0 1rem 4rem;
+  margin: 0;
+  padding: 2rem 40px 4rem;
   color: #ffffff;
   background: #141414;
   word-break: keep-all;
@@ -25,26 +24,41 @@ h3 {
   color: #ffffff;
 }
 
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
 .site-title {
   font-family: "Pretendard", sans-serif;
   font-weight: 700;
   font-size: 16px;
-  text-align: center;
   color: #ffffff;
+  margin: 0;
   word-break: normal;
   overflow-wrap: anywhere;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .site-description {
   font-family: "Pretendard", sans-serif;
   font-weight: 500;
   font-size: 14px;
-  text-align: center;
-  color: #8D8D8D;
+  color: #D8D7CF;
+  margin: 0;
 }
 
-.site-description a {
-  color: #8D8D8D;
+.site-description a,
+.site-description a:visited {
+  color: #D8D7CF;
   text-decoration: none;
 }
 
@@ -79,11 +93,11 @@ a:visited {
 .post-list {
   padding-left: 0;
   list-style: none;
-  text-align: center;
+  margin: 0;
 }
 
 .post-list li {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
 }
 
 .post-list a,
@@ -99,6 +113,20 @@ a:visited {
 
 .post-list time {
   display: none;
+}
+
+.post-container {
+  min-height: calc(100vh - 8rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.post-container article {
+  max-width: 800px;
+  text-align: center;
 }
 
 blockquote {
